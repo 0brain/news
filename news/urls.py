@@ -13,9 +13,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
+
+from articles.views import ArticleViewSet, CommentViewSet
+from rest_framework_nested import routers
+
+router = SimpleRouter()
+router.register('articles', ArticleViewSet)
+
+articles_router = routers.NestedSimpleRouter(router, r'articles', lookup='article')
+articles_router.register(r'comments', CommentViewSet, basename='article-comments')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path(r'', include(articles_router.urls)),
 ]
+
+urlpatterns += router.urls
